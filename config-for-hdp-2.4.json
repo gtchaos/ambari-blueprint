@@ -1,6 +1,6 @@
 {
     "ambari": {
-        "rpm": "http://hostname:8090/ambari/centos6/1.x/updates/1.6.0/ambari.repo",
+        "rpm": "http://db-dcdev.db01.example.com:8090/ambari/centos6/1.x/updates/1.6.0/ambari.repo",
         "server.port": "8080"
     },
     "ams-env": {
@@ -34,23 +34,21 @@
         "security.masterregion.protocol.acl": "*"
     },
     "ams-hbase-security-site": {
-        "ams.zookeeper.keytab": "",
-        "ams.zookeeper.principal": "",
-        "hadoop.security.authentication": "",
-        "hbase.coprocessor.master.classes": "",
-        "hbase.coprocessor.region.classes": "",
-        "hbase.master.kerberos.principal": "",
-        "hbase.master.keytab.file": "",
-        "hbase.myclient.keytab": "",
-        "hbase.myclient.principal": "",
-        "hbase.regionserver.kerberos.principal": "",
-        "hbase.regionserver.keytab.file": "",
-        "hbase.security.authentication": "",
-        "hbase.security.authorization": "",
-        "hbase.zookeeper.property.authProvider.1": "",
-        "hbase.zookeeper.property.jaasLoginRenew": "",
-        "hbase.zookeeper.property.kerberos.removeHostFromPrincipal": "",
-        "hbase.zookeeper.property.kerberos.removeRealmFromPrincipal": ""
+        "hbase.coprocessor.master.classes" : "org.apache.hadoop.hbase.security.access.AccessController",
+        "hbase.myclient.keytab" : "/etc/security/keytabs/ams.collector.keytab",
+        "hadoop.security.authentication" : "kerberos",
+        "hbase.myclient.principal" : "amshbase/_HOST@EXAMPLE.COM",
+        "ams.zookeeper.keytab" : "/etc/security/keytabs/ams-zk.service.keytab",
+        "hbase.zookeeper.property.jaasLoginRenew" : "3600000",
+        "hbase.regionserver.keytab.file" : "/etc/security/keytabs/ams-hbase.regionserver.keytab",
+        "hbase.zookeeper.property.authProvider.1" : "org.apache.zookeeper.server.auth.SASLAuthenticationProvider",
+        "hbase.regionserver.kerberos.principal" : "amshbase/_HOST@EXAMPLE.COM",
+        "hbase.zookeeper.property.kerberos.removeHostFromPrincipal" : "true",
+        "hbase.coprocessor.region.classes" : "org.apache.hadoop.hbase.security.token.TokenProvider,org.apache.hadoop.hbase.security.access.AccessController",
+        "hbase.master.keytab.file" : "/etc/security/keytabs/ams-hbase.master.keytab",
+        "hbase.zookeeper.property.kerberos.removeRealmFromPrincipal" : "true",
+        "hbase.master.kerberos.principal" : "amshbase/_HOST@EXAMPLE.COM",
+        "ams.zookeeper.principal" : "amszk/_HOST@EXAMPLE.COM"
     },
     "ams-hbase-site": {
         "dfs.client.read.shortcircuit": "true",
@@ -204,15 +202,6 @@
         "user_group": "hadoop"
     },
     "core-site": {
-        "fs.bos.access.key": "bmrak",
-        "fs.bos.endpoint": "10.220.155.63:8080",
-        "fs.bos.impl": "org.apache.hadoop.fs.bos.BaiduBosFileSystem",
-        "fs.bos.multipart.uploads.attempts": "5",
-        "fs.bos.multipart.uploads.block.size": "9437184",
-        "fs.bos.multipart.uploads.cocurrent.size": "3",
-        "fs.bos.multipart.uploads.factor": "10.0",
-        "fs.bos.multipart.uploads.speed": "10485760",
-        "fs.bos.secret.access.key": "bmrsk",
         "fs.defaultFS": "hdfs://%NN_HOST%:8020",
         "fs.trash.interval": "360",
         "ha.failover-controller.active-standby-elector.zk.op.retries": "120",
@@ -232,9 +221,6 @@
         "hadoop.proxyuser.oozie.hosts": "%OOZIE_HOST%",
         "hadoop.proxyuser.root.groups": "root,hdfs,hue",
         "hadoop.proxyuser.root.hosts": "%ROOT_HOST%",
-        "hadoop.security.auth_to_local": "\n        RULE:[2:$1@$0]([rn]m@.*)s/.*/yarn/\n        RULE:[2:$1@$0](jhs@.*)s/.*/mapred/\n        RULE:[2:$1@$0]([nd]n@.*)s/.*/hdfs/\n        RULE:[2:$1@$0](hm@.*)s/.*/hbase/\n        RULE:[2:$1@$0](rs@.*)s/.*/hbase/\n        DEFAULT\n    ",
-        "hadoop.security.authentication": "simple",
-        "hadoop.security.authorization": "false",
         "hadoop.security.key.provider.path": "",
         "io.compression.codecs": "org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.SnappyCodec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec,org.apache.hadoop.io.compress.BZip2Codec",
         "io.file.buffer.size": "131072",
@@ -335,8 +321,6 @@
         "hbase.regionserver.handler.count": "60",
         "hbase.regionserver.info.port": "60030",
         "hbase.rootdir": "hdfs://%NN_HOST%:8020/apps/hbase/data",
-        "hbase.security.authentication": "simple",
-        "hbase.security.authorization": "false",
         "hbase.superuser": "hbase",
         "hbase.tmp.dir": "/hadoop/hbase",
         "hbase.zookeeper.property.clientPort": "2181",
@@ -372,6 +356,8 @@
         "dfs.datanode.https.address": "0.0.0.0:50475",
         "dfs.datanode.ipc.address": "0.0.0.0:8010",
         "dfs.datanode.max.transfer.threads": "1024",
+        "dfs.datanode.keytab.file" : "/etc/security/keytabs/dn.service.keytab",
+        "dfs.datanode.kerberos.principal" : "dn/_HOST@EXAMPLE.COM",
         "dfs.domain.socket.path": "/var/lib/hadoop-hdfs/dn_socket",
         "dfs.encrypt.data.transfer.cipher.suites": "AES/CTR/NoPadding",
         "dfs.encryption.key.provider.uri": "",
@@ -382,6 +368,7 @@
         "dfs.journalnode.edits.dir": "/hadoop/hdfs/journalnode",
         "dfs.journalnode.http-address": "0.0.0.0:8480",
         "dfs.journalnode.https-address": "0.0.0.0:8481",
+        "dfs.journalnode.kerberos.internal.spnego.principal" : "HTTP/_HOST@EXAMPLE.COM",
         "dfs.namenode.accesstime.precision": "0",
         "dfs.namenode.acls.enabled": "false",
         "dfs.namenode.audit.log.async": "true",
@@ -403,6 +390,9 @@
         "dfs.namenode.stale.datanode.interval": "30000",
         "dfs.namenode.startup.delay.block.deletion.sec": "3600",
         "dfs.namenode.write.stale.datanode.ratio": "1.0f",
+        "dfs.namenode.keytab.file" : "/etc/security/keytabs/nn.service.keytab",
+        "dfs.namenode.kerberos.internal.spnego.principal" : "HTTP/_HOST@EXAMPLE.COM",
+        "dfs.namenode.kerberos.principal" : "nn/_HOST@EXAMPLE.COM",
         "dfs.permissions.enabled": "true",
         "dfs.permissions.superusergroup": "hdfs",
         "dfs.replication": "3",
@@ -410,8 +400,14 @@
         "dfs.support.append": "true",
         "dfs.webhdfs.enabled": "true",
         "fs.permissions.umask-mode": "022",
+        "dfs.web.authentication.kerberos.principal" : "HTTP/_HOST@EXAMPLE.COM",
+        "dfs.web.authentication.kerberos.keytab" : "/etc/security/keytabs/spnego.service.keytab",
+        "dfs.secondary.namenode.kerberos.principal" : "nn/_HOST@EXAMPLE.COM",
+        "dfs.secondary.namenode.keytab.file" : "/etc/security/keytabs/nn.service.keytab",
+        "dfs.secondary.namenode.kerberos.internal.spnego.principal" : "HTTP/_HOST@EXAMPLE.COM",
         "nfs.exports.allowed.hosts": "* rw",
-        "nfs.file.dump.dir": "/tmp/.hdfs-nfs"
+        "nfs.file.dump.dir": "/tmp/.hdfs-nfs",
+        "nfs.kerberos.principal" : "nfs/_HOST@EXAMPLE.COM"
     },
     "hive-env": {
         "content": "\n if [ \"$SERVICE\" = \"cli\" ]; then\n   if [ -z \"$DEBUG\" ]; then\n     export HADOOP_OPTS=\"$HADOOP_OPTS -XX:NewRatio=12 -Xms10m -XX:MaxHeapFreeRatio=40 -XX:MinHeapFreeRatio=15 -XX:+UseParNewGC -XX:-UseGCOverheadLimit\"\n   else\n     export HADOOP_OPTS=\"$HADOOP_OPTS -XX:NewRatio=12 -Xms10m -XX:MaxHeapFreeRatio=40 -XX:MinHeapFreeRatio=15 -XX:-UseGCOverheadLimit\"\n   fi\n fi\n\n# The heap size of the jvm stared by hive shell script can be controlled via:\n\nexport HADOOP_HEAPSIZE=\"{{hive_heapsize}}\"\nexport HADOOP_CLIENT_OPTS=\"-Xmx${HADOOP_HEAPSIZE}m $HADOOP_CLIENT_OPTS\"\n\n# Larger heap size may be required when running queries over large number of files or partitions.\n# By default hive shell scripts use a heap size of 256 (MB).  Larger heap size would also be\n# appropriate for hive server (hwi etc).\n\n\n# Set HADOOP_HOME to point to a specific hadoop install directory\nHADOOP_HOME=${HADOOP_HOME:-{{hadoop_home}}}\n\n# Hive Configuration Directory can be controlled by:\nexport HIVE_CONF_DIR={{hive_config_dir}}\n\n# Folder containing extra libraries required for hive compilation/execution can be controlled by:\nif [ \"${HIVE_AUX_JARS_PATH}\" != \"\" ]; then\n  export HIVE_AUX_JARS_PATH=${HIVE_AUX_JARS_PATH}\nelif [ -d \"/opt/bmr/hive/hcatalog/share/hcatalog\" ]; then\n  export HIVE_AUX_JARS_PATH=/opt/bmr/hive/hcatalog/share/hcatalog\nfi\n\nexport METASTORE_PORT={{hive_metastore_port}}\n    ",
@@ -546,6 +542,8 @@
         "hive.security.metastore.authorization.manager": "org.apache.hadoop.hive.ql.security.authorization.StorageBasedAuthorizationProvider,org.apache.hadoop.hive.ql.security.authorization.MetaStoreAuthzAPIAuthorizerEmbedOnly",
         "hive.server2.allow.user.substitution": "true",
         "hive.server2.authentication": "NOSASL",
+        "hive.server2.authentication.kerberos.principal": "hive/_HOST@EXAMPLE.COM",
+        "hive.server2.authentication.kerberos.keytab": "/etc/security/keytabs/hive.service.keytab",
         "hive.server2.authentication.spnego.keytab": "HTTP/_HOST@EXAMPLE.COM",
         "hive.server2.authentication.spnego.principal": "/etc/security/keytabs/spnego.service.keytab",
         "hive.server2.enable.doAs": "true",
@@ -705,9 +703,7 @@
     },
     "oozie-site": {
         "oozie.action.max.output.data": "20480",
-        "oozie.authentication.kerberos.name.rules": "\n      RULE:[2:$1@$0]([jt]t@.*TODO-KERBEROS-DOMAIN)s/.*/TODO-MAPREDUSER/\n      RULE:[2:$1@$0]([nd]n@.*TODO-KERBEROS-DOMAIN)s/.*/TODO-HDFSUSER/\n      RULE:[2:$1@$0](hm@.*TODO-KERBEROS-DOMAIN)s/.*/TODO-HBASE-USER/\n      RULE:[2:$1@$0](rs@.*TODO-KERBEROS-DOMAIN)s/.*/TODO-HBASE-USER/\n      DEFAULT\n    ",
         "oozie.authentication.simple.anonymous.allowed": "true",
-        "oozie.authentication.type": "simple",
         "oozie.base.url": "http://%OOZIE_HOST%:11000/oozie",
         "oozie.bmr.shell.action.timeout": "0",
         "oozie.credentials.credentialclasses": "hcat=org.apache.oozie.action.hadoop.HCatCredentials",
@@ -718,7 +714,6 @@
         "oozie.service.CallableQueueService.queue.size": "1000",
         "oozie.service.CallableQueueService.threads": "10",
         "oozie.service.HadoopAccessorService.hadoop.configurations": "*=/etc/hadoop/conf",
-        "oozie.service.HadoopAccessorService.kerberos.enabled": "false",
         "oozie.service.JPAService.create.db.schema": "false",
         "oozie.service.JPAService.jdbc.driver": "org.apache.derby.jdbc.EmbeddedDriver",
         "oozie.service.JPAService.jdbc.password": "oozie",
@@ -739,7 +734,9 @@
         "oozie.services.ext": "org.apache.oozie.service.JMSAccessorService,org.apache.oozie.service.PartitionDependencyManagerService,org.apache.oozie.service.HCatAccessorService\n    ",
         "oozie.system.id": "oozie-${user.name}",
         "oozie.systemmode": "NORMAL",
-        "use.system.libpath.for.mapreduce.and.pig.jobs": "false"
+        "use.system.libpath.for.mapreduce.and.pig.jobs": "false",
+        "oozie.authentication.kerberos.keytab": "/etc/security/keytabs/spnego.service.keytab",
+        "oozie.service.HadoopAccessorService.keytab.file" : "/etc/security/keytabs/oozie.service.keytab"
     },
 	"openvpn": {
 		"openvpn.server.port": "8900"
@@ -1031,7 +1028,6 @@
         "yarn.timeline-service.entity-group-fs-store.summary-store": "org.apache.hadoop.yarn.server.timeline.RollingLevelDBTimelineStore",
         "yarn.timeline-service.generic-application-history.store-class": "org.apache.hadoop.yarn.server.applicationhistoryservice.NullApplicationHistoryStore",
         "yarn.timeline-service.http-authentication.simple.anonymous.allowed": "true",
-        "yarn.timeline-service.http-authentication.type": "simple",
         "yarn.timeline-service.leveldb-state-store.path": "/hadoop/yarn/timeline",
         "yarn.timeline-service.leveldb-timeline-store.path": "/mnt/hadoop/yarn/timeline",
         "yarn.timeline-service.leveldb-timeline-store.read-cache-size": "104857600",
@@ -1263,14 +1259,14 @@
         "domains":"example.com",
         "manage_krb5_conf": "true",
         "conf_dir":"/etc",
-        "content" : "[libdefaults]\n  renew_lifetime = 7d\n  forwardable= true\n  default_realm = {{realm|upper()}}\n  ticket_lifetime = 24h\n  dns_lookup_realm = false\n  dns_lookup_kdc = false\n  #default_tgs_enctypes = {{encryption_types}}\n  #default_tkt_enctypes ={{encryption_types}}\n\n[logging]\n default = FILE:/mnt/bmr/log/kerberos/krb5kdc.log\n admin_server = FILE:/mnt/bmr/log/kerberos/kadmind.log\n kdc = FILE:/mnt/bmr/log/kerberos/krb5kdc.log\n\n[realms]\n  {{realm}} = {\n  default_domain = example.com\n  admin_server = {{admin_server_host|default(kdc_host, True)}}\n  kdc = {{kdc_host}}\n }\n\n[domain_realm]\n .<example></example>.com = {{realm|upper()}}\n example.com = {{realm|upper()}}\n"
+        "content" : "[libdefaults]\n  renew_lifetime = 7d\n  forwardable= true\n  default_realm = {{realm|upper()}}\n  ticket_lifetime = 24h\n  dns_lookup_realm = false\n  dns_lookup_kdc = false\n  #default_tgs_enctypes = {{encryption_types}}\n  #default_tkt_enctypes ={{encryption_types}}\n\n[logging]\n default = FILE:/mnt/bmr/log/kerberos/krb5kdc.log\n admin_server = FILE:/mnt/bmr/log/kerberos/kadmind.log\n kdc = FILE:/mnt/bmr/log/kerberos/krb5kdc.log\n\n[realms]\n  {{realm}} = {\n  default_domain = example.com\n  admin_server = {{admin_server_host|default(kdc_host, True)}}\n  kdc = {{kdc_host}}\n }\n\n[domain_realm]\n .example.com = {{realm|upper()}}\n example.com = {{realm|upper()}}\n"
     },
     "kerberos-env": {
         "kdc_type": "mit-kdc",
         "manage_identities": "true",
         "install_packages": "true",
         "encryption_types": "aes des3-cbc-sha1 rc4 des-cbc-md5",
-        "realm" : "BAIDU.COM",
+        "realm" : "EXAMPLE.COM",
         "kdc_hosts" : "%KDC_HOST%",
         "kdc_host" : "%KDC_HOST%",
         "admin_server_host" : "%KDC_HOST%",
@@ -1288,4 +1284,3 @@
         "ldap_url": ""
     }
 }
-
